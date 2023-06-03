@@ -35,16 +35,27 @@ jobs:
 
   build-windows:
     runs-on: windows-latest
+    defaults:
+      run:
+        shell: powershell
     steps:
       - uses: actions/checkout@v2
-      - name: Install dependencies
-        run: |
-          choco install -y \
-            choco install qt5-default
+      - uses: msys2/setup-msys2@v2
+        with:
+            install: mingw-w64-x86_64-toolchain
+            msystem: mingw64
+            release: false
 
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          version: '5.12.11'
+          host: 'windows'
+          dir: '${{github.workspace}}/qt/'
+          setup-python: false
       - name: Build
         run: |
-          qmake
+          & "$env:QT_ROOT_DIR\bin\qmake"
           make
           mkdir build
           mv myapp.exe build/
